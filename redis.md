@@ -2020,7 +2020,7 @@ See the [complete list of sorted set commands](https://redis.io/commands/?group=
 
 - 基础操作
 
-  - zrevrange key start stop  withscores                               列表反向输出
+  - zrevrange key start stop  withscores                               列表反向输出   withscores 输出values的值
 
   - 实际操作
 
@@ -2042,5 +2042,1324 @@ See the [complete list of sorted set commands](https://redis.io/commands/?group=
 
     
 
+##### `zrangebyscore `
 
+- 基础语法
+
+  - zrangebyscore key stat end  [withscores]  [limit]                    通过score获取这个范围的key值  withscores 输出values的值
+
+  - 实际操作
+
+    ```
+    #包含20 和 40 如果加( 就是不包含
+    127.0.0.1:6379> ZRANGEBYSCORE zset 20 40
+    1) "v2"
+    2) "v3"
+    3) "v4"
+    ```
+
+
+
+##### `zscore`
+
+- 基础语法
+
+  - zscore key member                                       通过value的值来获取score
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> zscore zset v2
+    "20"
+    ```
+
+    
+
+##### `zcard`
+
+- 基础语法
+
+  - zcard  key                                                           获取key的长度
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> zcard zset
+    (integer) 6
+    ```
+
+    
+
+##### `zrem`
+
+- 基础语法
+
+  - zrem key member [member...]                                  通过value的值来删除
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> zrem zset v6 v5
+    (integer) 2
+    ```
+
+    
+
+##### `zincrby`
+
+- 基础语法
+
+  - zincrby key number member                                       根据value的值来跟指定的score增加
+
+  - 实际操作
+
+    ```
+    #最开始v1的score的值为10
+    127.0.0.1:6379> ZINCRBY zset 10 v1
+    "20"
+    ```
+```
+    
+    
+
+##### `zcount`
+
+- 基础语法
+
+  - zcount key  min max                                                 通过score的最小和最大值来判断有多少个
+
+  - 实际操作
+
+```
+    127.0.0.1:6379> zrange zset 0 -1 withscores
+    1) "v1"
+    2) "20"
+    3) "v2"
+    4) "20"
+    5) "v3"
+    6) "30"
+    7) "v4"
+    8) "40"
+    127.0.0.1:6379> ZCOUNT zset 25 30
+    (integer) 1
+    
+    ```
+
+
+
+##### `zmpop`
+
+- 基础语法
+
+  - zmpop numkeys key [key...]  min | max  [COUNT  count]     弹出count大小的最大或者最小值
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> zmpop 1 zset min count 1
+    1) "zset"
+    2) 1) 1) "v1"
+          2) "20"
+    
+    ```
+
+
+
+
+
+##### `zrank`
+
+- 基础语法
+
+  -  zrank key member                                      通过value的值来获取下标
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> zrange zset 0 -1
+    1) "v1"
+    2) "v2"
+    3) "v3"
+    4) "v4"
+    127.0.0.1:6379> zrank zset v2
+    (integer) 1
+    
+    ```
+
+    
+
+
+
+##### `zrevrank`
+
+- 基础语法
+
+  - zrevrank  key  member                                    通过value来获取逆序下标
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> zrange zset 0 -1
+    1) "v1"
+    2) "v2"
+    3) "v3"
+    4) "v4"
+    127.0.0.1:6379> zrank zset v2
+    (integer) 1
+    127.0.0.1:6379> zrevrank zset v2
+    (integer) 2
+    
+    ```
+
+    
+
+
+
+
+
+### bitmap
+
+> 由0和一表现的二进制位的bit数组
+
+#### Basic commands
+
+- [`SETBIT`](https://redis.io/commands/setbit) sets a bit at the provided offset to 0 or 1.
+- [`GETBIT`](https://redis.io/commands/getbit) returns the value of a bit at a given offset.
+- [`BITOP`](https://redis.io/commands/bitop) lets you perform bitwise operations against one or more strings.
+
+See the [complete list of bitmap commands](https://redis.io/commands/?group=bitmap).
+
+
+
+
+
+##### `setbit`
+
+- 基础语法
+
+  - setbit key offset  0|1                                     创建一个bitmap的值 offset为偏移量   
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> setbit bitmap  1 1
+    0
+    ```
+
+    
+
+##### `getbit`
+
+- 基础语法
+
+  - getbit  key  offset                                             获取偏移下表为1的值，下表标从0开始
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> getbit bitmap 1
+    (integer) 1
+    ```
+
+
+
+
+##### `strlen`
+
+- 基础语法
+
+  - strlen key                                                                 不是字符长度而是占据几个字节，超过八位后自己按照8位一组一byte在扩容
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> strlen bitmap
+    (integer) 1
+    ```
+
+
+
+##### `bitcount`
+
+- 基础语法
+
+  - bitcount key                                                                         计算为1的数量
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> setbit k2 0 1
+    (integer) 0
+    127.0.0.1:6379> setbit k2 1 1
+    (integer) 0
+    127.0.0.1:6379> setbit k2 2 1
+    (integer) 0
+    127.0.0.1:6379> bitcount k2 
+    (integer) 3
+    
+    ```
+
+    
+
+##### `bitop`
+
+> 小案例统计连续两天签到的人
+
+- 基础语法
+
+  - bitop operation  destkey   key   [key]
+
+    - operation 选项
+      - and   or    xor   not
+
+  - 实际操作
+
+    ```Linux
+    #创建3个用户下标为 0 1 2
+    127.0.0.1:6379> hset uid:map 0 uid-2jkhasd5-wmt 1 uid-jasd48-wang 2 uid-nanjwna5-li
+    (integer) 3
+    127.0.0.1:6379> hgetall uid:map
+    1) "0"
+    2) "uid-2jkhasd5-wmt"
+    3) "1"
+    4) "uid-jasd48-wang"
+    5) "2"
+    6) "uid-nanjwna5-li"
+    #判断第一天签到的人数  key后面第一个数为用户下标  第二个为是否签到
+    127.0.0.1:6379> setbit 20230510 0 1
+    (integer) 0
+    127.0.0.1:6379> setbit 20230510 1 1
+    (integer) 0
+    127.0.0.1:6379> setbit 20230510 2 0
+    (integer) 0
+    #判断第二天签到的人数  key后面第一个数为用户下标  第二个为是否签到
+    127.0.0.1:6379> setbit 20230511 0 0
+    (integer) 0
+    127.0.0.1:6379> setbit 20230511 1 1
+    (integer) 0
+    127.0.0.1:6379> setbit 20230511 2 0
+    (integer) 0
+    #通过bitop 来比较生成一个全新的bitmap countday
+    127.0.0.1:6379> bitop and countday 20230510 20230511
+    (integer) 1
+    #计算连续签到的2天的人数为
+    127.0.0.1:6379> bitcount countday
+    (integer) 1
+    
+    
+    ```
+
+    
+
+##### 打卡案例
+
+```
+#签到情况
+127.0.0.1:6379> setbit sign:user1:202305 0 1
+(integer) 0
+127.0.0.1:6379> setbit sign:user1:202305 1 1
+(integer) 0
+127.0.0.1:6379> setbit sign:user1:202305 2 1
+(integer) 0
+127.0.0.1:6379> setbit sign:user1:202305 3 1
+(integer) 0
+127.0.0.1:6379> setbit sign:user1:202305 5 1
+(integer) 0
+127.0.0.1:6379> setbit sign:user1:202305 25 1
+(integer) 0
+127.0.0.1:6379> setbit sign:user1:202305 30 1
+(integer) 0
+#查看第7天签到没有
+127.0.0.1:6379> getbit sign:user1:202305 6
+(integer) 0
+#查看第31天签到没有
+127.0.0.1:6379> getbit sign:user1:202305 30
+(integer) 1
+#查看一共来了多少天
+127.0.0.1:6379> bitcount  sign:user1:202305 
+(integer) 7
+#查看前11天一共来了多少天
+127.0.0.1:6379> bitcount  sign:user1:202305 0 10 bit
+(integer) 5
+#查看前3天一共来了多少天
+127.0.0.1:6379> bitcount  sign:user1:202305 0 2 bit
+(integer) 3
+```
+
+
+
+
+
+### HyperLogLog
+
+> redis在2.8.9版本添加了HyperLogLog结构。   string类型
+
+Redis HyperLogLog是用来做基数统计的算法，HyperLogLog 的优点是，在输入元素的数量或者体积非常非常大时，计算基数所需的空间总.
+
+是固定的、并且是很小的。
+
+在Redis里面，每个HyperLogLog键只需要花费12 KB内存，就可以计算接近2^64个不同元素的基数。这和计算基数时，元素越多耗费
+内存就越多的集合形成鲜明对比。
+
+但是，因为HyperLogLog只会根据输入元素来计算基数，而不会储存输入元素本身，所以HyperLogLog不能像集合那样,返回输入的各个
+元素。.
+
+#### Basic commands
+
+- [`PFADD`](https://redis.io/commands/pfadd) adds an item to a HyperLogLog.
+- [`PFCOUNT`](https://redis.io/commands/pfcount) returns an estimate of the number of items in the set.
+- [`PFMERGE`](https://redis.io/commands/pfmerge) combines two or more HyperLogLogs into one.
+
+See the [complete list of HyperLogLog commands](https://redis.io/commands/?group=hyperloglog).
+
+
+
+#### 基础操作
+
+
+
+##### `pfadd`
+
+- 基础操作
+
+  - pfadd   key element [element...]                                     创建一个Hyperloglog
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> pfadd loglog1 1 2 3 4 5 6
+    (integer) 1
+    127.0.0.1:6379> pfadd loglog2 1 1 2 2 3 3
+    (integer) 1
+    ```
+
+
+
+##### `pfcount`
+
+- 基础操作
+
+  - pfcount key                                                                    记录基数无重复的个数
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> pfadd loglog1 1 2 3 4 5 6
+    (integer) 1
+    127.0.0.1:6379> pfadd loglog2 1 1 2 2 3 3
+    (integer) 1
+    127.0.0.1:6379> pfcount loglog1
+    (integer) 6
+    127.0.0.1:6379> pfcount loglog2
+    (integer) 3
+    ```
+
+    
+
+##### `pfmerge`
+
+- 基础操作
+
+  - pfmerge destkey  sourcekey  [sourcekey...]                       合并hyperloglog
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> pfmerge loglog loglog1 loglog2
+    OK
+    ```
+
+    
+
+
+
+### GEO
+
+> 保存地理坐标的    zset的子类
+
+主要分为三步
+
+1. 将三维的地球变为二维的坐标
+   2. 在将二维的坐标转换为一维的点块
+      3. 最后将- -维的点块转换为二进制再通过base32编码
+         
+
+![image-20230511134056141](..\redis-study\imgs\image-20230511134056141.png)
+
+
+
+> 什么是经纬线
+
+![经纬线](https://bkimg.cdn.bcebos.com/pic/4d086e061d950a7b5037b7a209d162d9f2d3c952?x-bce-process=image/resize,m_lfit,w_536,limit_1)
+
+[经线](https://baike.baidu.com/item/经线/1695723?fromModule=lemma_inlink)和纬线是人们为了在地球上确定位置和方向的，在[地球仪](https://baike.baidu.com/item/地球仪/64759?fromModule=lemma_inlink)和地图上画出来。
+
+经纬线相互垂直。纬线是一条条长度不等的圆圈。最长的纬线，就是[赤道](https://baike.baidu.com/item/赤道/106883?fromModule=lemma_inlink)。 [经线](https://baike.baidu.com/item/经线/1695723?fromModule=lemma_inlink)是一条条长度相等的弧线，连接南北两极。因为经线指示南北方向，所以，经线又叫子午线。
+
+国际上规定，把通过英国[格林尼治天文台](https://baike.baidu.com/item/格林尼治天文台/1027780?fromModule=lemma_inlink)原址的经线，叫做0°经线，也叫[本初子午线](https://baike.baidu.com/item/本初子午线/248147?fromModule=lemma_inlink)。在地球上经线指示南北方向，纬线指示东西方向。东西半球[分界线](https://baike.baidu.com/item/分界线/79262?fromModule=lemma_inlink)：东经160° 西经20°。
+
+
+
+#### Basic commands
+
+- [`GEOADD`](https://redis.io/commands/geoadd) adds a location to a given geospatial index (note that longitude comes before latitude with this command).
+- [`GEOSEARCH`](https://redis.io/commands/geosearch) returns locations with a given radius or a bounding box.
+
+See the [complete list of geospatial index commands](https://redis.io/commands/?group=geo).
+
+
+
+#### 基本操作
+
+##### `geoadd`
+
+- 基础操作
+
+  - geoadd key   longitude   latitude   member                     longitude 经度     latitude   维度
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> GEOADD city 103.569195 30.911742 "青城山"
+    (integer) 1
+    ```
+
+    
+
+##### 中文乱码问题
+
+> 加上 --raw
+
+```
+127.0.0.1:6379> zrange city 0 -1
+1) "\xe9\x9d\x92\xe5\x9f\x8e\xe5\xb1\xb1"
+127.0.0.1:6379> quit
+[root@hadoop100 ~]# redis-cli -a 123456 --raw
+Warning: Using a password with '-a' or '-u' option on the command line interface may not be safe.
+127.0.0.1:6379> zrange city 0 -1
+青城山
+```
+
+
+
+##### `geopos`
+
+- 基础操作
+
+  - geopos  key   member                                                            获取经纬度
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> geopos city 青城山
+    103.56919616460800171
+    30.91174198571239629
+    ```
+
+
+
+##### `geohash`
+
+- 基础操作
+
+  - geohash    key     member                                                 把经纬度转化成geohash   转化后经度会有误差
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> geohash city 青城山
+    wm3xug2ccn0
+    ```
+
+    
+
+##### `geodist`
+
+- 基础操作
+
+  - geodist     key    member        m | km | ft | mi                    查看2个地的距离
+
+  - 实际操作
+
+    ```
+    #查看2个地的距离
+    127.0.0.1:6379> geodist city 青城山 宜宾  km
+    259.8370
+    
+    127.0.0.1:6379> geoadd city 116.403542 39.924371 "北京"
+    1
+    127.0.0.1:6379> geoadd  city 104.640892 28.768508 "南京"
+    1
+    127.0.0.1:6379> geodist city 南京 北京 km
+    1642.0406
+    
+    
+    ```
+
+    
+
+##### `georadius`
+
+- 基础操作
+
+  - GEORADIUS key longitude latitude radius <M | KM | FT | MI>  [WITHCOORD] [WITHDIST] [WITHHASH] [COUNT count [ANY]] [ASC | DESC] [STORE key] [STOREDIST key]
+
+  - options
+
+    - WITHDIST表示在返回的结果中同时返回离指定中心点的距离。距离的单位与命令中指定的半径单位相同。
+    - WITHCOORD表示在返回的结果中同时返回匹配项的经度和纬度坐标。
+    - WITHHASH表示在返回的结果中同时返回匹配项的原始geohash编码的排序集分数，以52位无符号整数的形式表示。
+    - 可以使用 ASC 和 DESC 选项来调用两种不同的排序方法。ASC 表示按距离中心最近到最远的顺序排序，而 DESC 表示按距离中心最远到最近的顺序排序。默认情况下，返回所有匹配的项。可以使用 COUNT 选项将结果限制为前 N 个匹配项。如果提供了 ANY，则命令将在找到足够的匹配项后立即返回，因此结果可能不是最接近指定点的结果，但服务器的工作量显着降低。如果没有提供 ANY，则命令将按比例执行与指定区域匹配的项数量，并对它们进行排序，因此即使只返回少量结果，查询非常大的区域并使用非常小的 COUNT 选项可能会很慢。默认情况下，该命令将结果返回给客户端。可以使用 STORE 和 STOREDIST 选项之一将结果存储在一个排序集合中，该集合包含它们的地理空间信息或它们距离中心的浮点数，单位与半径指定的单位相同。
+
+  - 实际操作
+
+    ```
+    #当前位置 116.385488 39.87128 北京南站
+    127.0.0.1:6379> GEORADIUS city 116.385488 39.87128 10 km withdist withcoord withhash  count 10 desc
+    北京
+    6.1028
+    4069885568957141
+    116.40353947877883911
+    39.92437143561796375
+    天安门
+    4.5563
+    4069885550849194
+    116.40417784452438354
+    39.90965230984568279
+    
+    ```
+
+    
+
+
+
+##### `georadiusbymember`
+
+- 基础操作
+
+  - georadiusbymember key  member  radius <M | KM | FT | MI>  [WITHCOORD] [WITHDIST] [WITHHASH] [COUNT count [ANY]] [ASC | DESC] [STORE key] [STOREDIST key]
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> geoadd city 116.385488 39.87128 "北京南站"
+    1
+    127.0.0.1:6379> georadiusbymember city  北京南站   10 km   withdist withcoord withhash count 10 asc
+    北京南站
+    0.0000
+    4069885251630939
+    116.38548821210861206
+    39.87127916621444967
+    天安门
+    4.5564
+    4069885550849194
+    116.40417784452438354
+    39.90965230984568279
+    北京
+    6.1028
+    4069885568957141
+    116.40353947877883911
+    39.92437143561796375
+    ```
+
+    
+
+
+
+### stream
+
+> redis-steam就是redis版的MQ  消息中间件    redis 5.0的特点
+
+#### Basic commands
+
+- [`XADD`](https://redis.io/commands/xadd) adds a new entry to a stream.
+- [`XREAD`](https://redis.io/commands/xread) reads one or more entries, starting at a given position and moving forward in time.
+- [`XRANGE`](https://redis.io/commands/xrange) returns a range of entries between two supplied entry IDs.
+- [`XLEN`](https://redis.io/commands/xlen) returns the length of a stream.
+
+See the [complete list of stream commands](https://redis.io/commands/?group=stream)
+
+
+
+
+
+#### 基础操作
+
+
+
+##### `xadd`
+
+- 基础操作 
+
+  - xadd    key     *    field     value    [field  value...]                         *表示自动生成消息id
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> xadd mystream * uid 11 uname wmt
+    "1683858819951-0"
+    127.0.0.1:6379> xadd mystream * uid 12 uname z3
+    "1683858985321-0"
+    127.0.0.1:6379> xadd mystream * uid 13 uname w5
+    "1683859000340-0"
+    
+    #会自动保证后面的id会比前面大         生成消息id的格式： 毫秒时间戳-该毫秒生成的第几条消息（自增id）
+    ```
+
+    
+
+##### `xrange`
+
+- 基础操作
+
+  - xrange   key     start       end       [COUNT   count]                     start：-                      end：+              从小到大遍历
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> XRANGE mystream - +
+    1) 1) "1683858819951-0"
+       2) 1) "uid"
+          2) "11"
+          3) "uname"
+          4) "wmt"
+    2) 1) "1683858985321-0"
+       2) 1) "uid"
+          2) "12"
+          3) "uname"
+          4) "z3"
+    3) 1) "1683859000340-0"
+       2) 1) "uid"
+          2) "13"
+          3) "uname"
+          4) "w5"
+    
+    ```
+
+    
+
+##### `xrevrange`
+
+- 基础操作
+
+  - xrevange   key     end     start           [COUNT   count]                     start：-                      end：+                    从大到小遍历
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> xrevrange mystream + -
+    1) 1) "1683859000340-0"
+       2) 1) "uid"
+          2) "13"
+          3) "uname"
+          4) "w5"
+    2) 1) "1683858985321-0"
+       2) 1) "uid"
+          2) "12"
+          3) "uname"
+          4) "z3"
+    3) 1) "1683858819951-0"
+       2) 1) "uid"
+          2) "11"
+          3) "uname"
+          4) "wmt"
+    ```
+
+    
+
+##### `xdel`
+
+- 基础操作
+
+  - xdel    key     id                                                                           按照id来删除
+
+  - 实际操作
+
+    ```
+    1) 1) "1683859000340-0"
+       2) 1) "uid"
+          2) "13"
+          3) "uname"
+          4) "w5"
+    2) 1) "1683858985321-0"
+       2) 1) "uid"
+          2) "12"
+          3) "uname"
+          4) "z3"
+    3) 1) "1683858819951-0"
+       2) 1) "uid"
+          2) "11"
+          3) "uname"
+          4) "wmt"
+    127.0.0.1:6379> xdel mystream 1683858819951-0
+    (integer) 1
+    127.0.0.1:6379> xrevrange mystream + -
+    1) 1) "1683859000340-0"
+       2) 1) "uid"
+          2) "13"
+          3) "uname"
+          4) "w5"
+    2) 1) "1683858985321-0"
+       2) 1) "uid"
+          2) "12"
+          3) "uname"
+          4) "z3"
+    127.0.0.1:6379> 
+    ```
+
+
+
+##### `xlen`
+
+* 基础操作
+
+  * xlen   key                                                                              获取key值里面的长度
+
+  * 实际操作
+
+    ```
+    127.0.0.1:6379> xlen mystream
+    (integer) 2
+    ```
+
+
+
+
+
+##### `xtrim`
+
+- 基础操作
+
+  - xtrim  key    maxlen| minid                                           截取
+
+  - 实际操作
+
+    ```
+    #截取id最大的两个
+    127.0.0.1:6379> xrange mystream - +
+    1) 1) "1683858985321-0"
+       2) 1) "uid"
+          2) "12"
+          3) "uname"
+          4) "z3"
+    2) 1) "1683859000340-0"
+       2) 1) "uid"
+          2) "13"
+          3) "uname"
+          4) "w5"
+    3) 1) "1683862393551-0"
+       2) 1) "k1"
+          2) "v1"
+          3) "k2"
+          4) "v2"
+    4) 1) "1683862436139-0"
+       2) 1) "k3"
+          2) "v3"
+    127.0.0.1:6379> XTRIM mystream maxlen 2
+    (integer) 2
+    127.0.0.1:6379> xrange mystream - +
+    1) 1) "1683862393551-0"
+       2) 1) "k1"
+          2) "v1"
+          3) "k2"
+          4) "v2"
+    2) 1) "1683862436139-0"
+       2) 1) "k3"
+          2) "v3"
+    
+    #根据minid截取比改id要小的值会被抛弃保留大的
+    127.0.0.1:6379> xrange mystream - +
+    1) 1) "1683863004149-0"
+       2) 1) "k1"
+          2) "v1"
+    2) 1) "1683863009168-0"
+       2) 1) "k2"
+          2) "v2"
+    3) 1) "1683863013266-0"
+       2) 1) "k3"
+          2) "v3"
+    4) 1) "1683863018432-0"
+       2) 1) "k4"
+          2) "v4"
+    127.0.0.1:6379> XTRIM mystream minid 1683863013266-0
+    (integer) 2
+    127.0.0.1:6379> xrange mystream - +
+    1) 1) "1683863013266-0"
+       2) 1) "k3"
+          2) "v3"
+    2) 1) "1683863018432-0"
+       2) 1) "k4"
+          2) "v4"
+    
+    
+    ```
+
+
+
+
+
+
+##### `xread`
+
+- 基础语法
+
+  - XREAD [COUNT count] [BLOCK milliseconds] STREAMS key [key ...] id [id ...]
+
+    - BLOCK是否已阻塞的方式读取消息，默认不阻塞，如果milliseconds设置为0， 表示永远阻塞
+
+  - 实际操作
+
+    ```
+    #数据模型
+    127.0.0.1:6379> xrange mystream - +
+    1) 1) "1683863013266-0"
+       2) 1) "k3"
+          2) "v3"
+    2) 1) "1683863018432-0"
+       2) 1) "k4"
+          2) "v4"
+    3) 1) "1683879338002-0"
+       2) 1) "k5"
+          2) "v5"
+    4) 1) "1683879343944-0"
+       2) 1) "k6"
+          2) "v6"
+    5) 1) "1683879350063-0"
+       2) 1) "k7"
+          2) "v7"
+          
+    #  $代表特殊ID，表示以当前Stream已经存储的最大的ID作为最后一个ID， 当前Stream中不存在大于当前最大ID的消息，因此此时#返回nil
+     
+    #非阻塞
+    127.0.0.1:6379> xread count 2 streams mystream $
+    (nil)
+    
+    #0-0代表从最小的ID开始获取Stream中的消息，当不指定count, 将会返回Stream中的所有消息，注意也可以使用0 ( 00/000也都是#可以的
+    
+    127.0.0.1:6379> xread count 2 streams mystream 0-0
+    1) 1) "mystream"
+       2) 1) 1) "1683863013266-0"
+             2) 1) "k3"
+                2) "v3"
+          2) 1) "1683863018432-0"
+             2) 1) "k4"
+                2) "v4"
+    
+    127.0.0.1:6379> xread count 10 streams mystream 00
+    1) 1) "mystream"
+       2) 1) 1) "1683863013266-0"
+             2) 1) "k3"
+                2) "v3"
+          2) 1) "1683863018432-0"
+             2) 1) "k4"
+                2) "v4"
+          3) 1) "1683879338002-0"
+             2) 1) "k5"
+                2) "v5"
+          4) 1) "1683879343944-0"
+             2) 1) "k6"
+                2) "v6"
+          5) 1) "1683879350063-0"
+             2) 1) "k7"
+                2) "v7"
+    
+    
+    #阻塞
+    #开启2个客户端一个生产者一个消费者
+    #生产者 
+    127.0.0.1:6379> xadd mystream * k8 v8
+    "1683879938448-0"
+    
+    #消费者
+    127.0.0.1:6379> xread count 1 block 0 streams mystream $
+    1) 1) "mystream"
+       2) 1) 1) "1683879938448-0"
+             2) 1) "k8"
+                2) "v8"
+    (66.89s)  耗时66秒
+    
+    
+    ```
+
+
+
+
+
+##### 小总结
+
+![image-20230512162820875](..\redis-study\imgs\image-20230512162820875.png)
+
+
+
+
+
+
+
+#### 创建消费者
+
+
+
+##### `xgroup`
+
+- 基础语法
+
+  - xgroup   create  key   groupname id|$                                           创建消费者
+
+    - 创建消费者组的时候必须指定ID, ID为0表示从头开始消费，为$表示只消费新的消息，**队尾新来**
+
+  - 实际操作
+
+    ```
+    #创建消费者
+    127.0.0.1:6379> XGROUP CREATE mystream groupA $
+    OK
+    #表示从尾部开始消费
+    127.0.0.1:6379> XGROUP CREATE mystream groupB 0
+    OK
+    #表示从头部开始消费
+    ```
+
+
+
+##### `xreadgroup`
+
+- 基础操作
+
+  -  XREADGROUP GROUP group consumer [COUNT count] [BLOCK milliseconds] [NOACK] STREAMS key [key ...] id [id ...]
+
+    - " > " 表示从第一条尚未被消费的消息开始读取
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> XREADGROUP group groupB consumer1 streams mystream >
+    1) 1) "mystream"
+       2) 1) 1) "1683863013266-0"
+             2) 1) "k3"
+                2) "v3"
+          2) 1) "1683863018432-0"
+             2) 1) "k4"
+                2) "v4"
+          3) 1) "1683879338002-0"
+             2) 1) "k5"
+                2) "v5"
+          4) 1) "1683879343944-0"
+             2) 1) "k6"
+                2) "v6"
+          5) 1) "1683879350063-0"
+             2) 1) "k7"
+                2) "v7"
+          6) 1) "1683879938448-0"
+             2) 1) "k8"
+                2) "v8"
+    127.0.0.1:6379> XREADGROUP group groupB consumer2 streams mystream >
+    (nil)
+    
+    #stream中的消息一旦被消费组里的一个消费者读取了，就不能再被该消费组内的其他消费者读取了，即同一个消费组里的消费者不能消费#同一条消息。刚才的XREADGROUP命令再执行一次，此时读到的就是空值
+    
+    
+    #但是不同组的就可以继续消费
+    127.0.0.1:6379> XREADGROUP group groupB2 consumer1 streams  mystream >
+    1) 1) "mystream"
+       2) 1) 1) "1683863013266-0"
+             2) 1) "k3"
+                2) "v3"
+          2) 1) "1683863018432-0"
+             2) 1) "k4"
+                2) "v4"
+          3) 1) "1683879338002-0"
+             2) 1) "k5"
+                2) "v5"
+          4) 1) "1683879343944-0"
+             2) 1) "k6"
+                2) "v6"
+          5) 1) "1683879350063-0"
+             2) 1) "k7"
+                2) "v7"
+          6) 1) "1683879938448-0"
+             2) 1) "k8"
+                2) "v8"
+    127.0.0.1:6379> XREADGROUP group groupB2 consumer2 streams  mystream >
+    (nil)
+    
+    
+    ```
+
+    
+
+> 让组内的多个消费者共同分担读取消息，所以，我们通常会让每个消费者读取部分消息，从而实现消息读取负载在多个消费者间是均衡分布的
+
+```
+127.0.0.1:6379> XREADGROUP group groupC consumer1 count 2 streams mystream >
+1) 1) "mystream"
+   2) 1) 1) "1683863013266-0"
+         2) 1) "k3"
+            2) "v3"
+      2) 1) "1683863018432-0"
+         2) 1) "k4"
+            2) "v4"
+127.0.0.1:6379> XREADGROUP group groupC consumer2 count 2 streams mystream >
+1) 1) "mystream"
+   2) 1) 1) "1683879338002-0"
+         2) 1) "k5"
+            2) "v5"
+      2) 1) "1683879343944-0"
+         2) 1) "k6"
+            2) "v6"
+127.0.0.1:6379> XREADGROUP group groupC consumer3 count 4 streams mystream >
+1) 1) "mystream"
+   2) 1) 1) "1683879350063-0"
+         2) 1) "k7"
+            2) "v7"
+      2) 1) "1683879938448-0"
+         2) 1) "k8"
+            2) "v8"
+
+```
+
+
+
+#### ACK机制
+
+> 上面的操作只是表示已读但是没有处理
+
+
+
+##### `xpending`
+
+- 基础语法
+
+  - xpending    key      group   [BLOCK milliseconds]  start   end   count  [consumer]                   查看消费者已读未确认的清单列表
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> XPENDING mystream groupC 
+    1) (integer) 6                #消息的总条数
+    2) "1683863013266-0"          #消费者读取最小的消息id
+    3) "1683879938448-0"          #消费者读取最大的消息id
+    4) 1) 1) "consumer1"          #消费者名称
+          2) "2"				  #消费者读取的行数
+       2) 1) "consumer2"
+          2) "2"
+       3) 1) "consumer3"
+          2) "2"
+    
+    #查看具体的消费者
+    127.0.0.1:6379> xpending mystream groupC  - + 10  consumer1
+    1) 1) "1683863013266-0"
+       2) "consumer1"
+       3) (integer) 6157601
+       4) (integer) 1
+    2) 1) "1683863018432-0"
+       2) "consumer1"
+       3) (integer) 6157601
+       4) (integer) 1
+    ```
+
+
+
+##### `XACK`
+
+- 基础操作
+
+  - xack   key  group   id [id...]                                           消息确认
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> xpending mystream groupC  - + 10  consumer1
+    1) 1) "1683863013266-0"
+       2) "consumer1"
+       3) (integer) 6157601
+       4) (integer) 1
+    2) 1) "1683863018432-0"
+       2) "consumer1"
+       3) (integer) 6157601
+       4) (integer) 1
+    127.0.0.1:6379> XACK mystream groupC  1683863013266-0
+    (integer) 1
+    127.0.0.1:6379> xpending mystream groupC  - + 10  consumer1
+    1) 1) "1683863018432-0"
+       2) "consumer1"
+       3) (integer) 6200768
+       4) (integer) 1
+    
+    ```
+
+    
+
+##### `xinfo`
+
+- 基础语法
+
+  - xinfo  stream  kye 
+
+  - 实际操作
+
+    ```
+    127.0.0.1:6379> XINFO STREAM mystream
+     1) "length"
+     2) (integer) 6
+     3) "radix-tree-keys"
+     4) (integer) 1
+     5) "radix-tree-nodes"
+     6) (integer) 2
+     7) "last-generated-id"
+     8) "1683879938448-0"
+     9) "max-deleted-entry-id"
+    10) "1683862436139-0"
+    11) "entries-added"
+    12) (integer) 13
+    13) "recorded-first-entry-id"
+    14) "1683863013266-0"
+    15) "groups"
+    16) (integer) 4
+    17) "first-entry"
+    18) 1) "1683863013266-0"               #第一个
+        2) 1) "k3"
+           2) "v3"
+    19) "last-entry"
+    20) 1) "1683879938448-0"
+        2) 1) "k8"
+           2) "v8"
+    
+    ```
+
+    
+
+
+
+### bitfield
+
+> 了解即可
+
+
+
+BITFIELD命令的作用在于它能够将很多小的整数储存到一个长度较大的位图中，又或者将一 个非常庞大的键分割为多个较小的键来进行储存，从而非常高效地使用内存，使得Redis能够得到更多不同的应用一特别是在实时分析领域:BITFIELD能够以指定的方式对计算溢出进行控制的能力，使得它可以被应用于这一领域。
+
+说人话就是：
+
+> 将一个Redis字符串看作是一个由二进制位组成的数组并能对变长位宽和任意没有字节对齐的指定整型位域进行寻址和修改
+
+
+
+
+
+![image-20230512190858169](..\redis-study\imgs\image-20230512190858169.png)
+
+
+
+
+
+[ASCII码一览表，ASCII码对照表 (biancheng.net)](http://c.biancheng.net/c/ascii/)
+
+##### `bitfield`
+
+- 基础语法
+
+  - bitfield  key  GET  encoding   offset|[OVERFLOW WRAP|SAT|FAIL]    SET   encoding   offset   value|INCRBY  encoding offset increment [GET encoding offset|[OVERFLOW WRAP|SAT|FAIL] SET enc
+
+  - 实际操作
+
+    ```
+    #get获取
+    127.0.0.1:6379> set fieldkey hello
+    OK
+    127.0.0.1:6379> get fieldkey
+    "hello"
+    127.0.0.1:6379> bitfield fieldkey get i8 0
+    1) (integer) 104   #h对应ASCII码十进制的104
+    127.0.0.1:6379> bitfield fieldkey get i8 8
+    1) (integer) 101   #e对应ASCII码十进制的101
+    127.0.0.1:6379> bitfield fieldkey get i8 16
+    1) (integer) 108  #l对应ASCII码十进制的108
+    127.0.0.1:6379> bitfield fieldkey get i8 24
+    1) (integer) 108  #l对应ASCII码十进制的108
+    ```
+
+  - bitfield set
+
+    - 通过set去修改value的值
+
+    - 实际操作     120 ASCII码对应的x
+
+      ```
+      127.0.0.1:6379> BITFIELD fieldkey set i8 8 120
+      1) (integer) 101
+      127.0.0.1:6379> get fieldkey
+      "hxllo"
+      ```
+
+      
+
+#### 溢出控制
+
+WRAP:使用回绕(wrap around)方法处理有符号整数和无符号整数的溢出情况
+
+SAT:使用饱和计算(saturation arithmetic)方法处理溢出，下溢计算的结果为最小的整数值，而上溢计算的结果为最大的整数值
+
+FAIL:命令将拒绝执行那些会导致.上溢或者下溢情况出现的计算,并向用户返回空值表示计算未被执行
+
+
+
+- WRAP溢出
+
+  > 使用回绕(wrap around)方法处理有符号整数和无符号整数的溢出情况
+
+```
+127.0.0.1:6379> BITFIELD fieldkey incrby u4 2 1  #从第3个位开始，对接下来的4位无符号数+1
+1) (integer) 11
+127.0.0.1:6379> BITFIELD fieldkey incrby u4 2 1
+1) (integer) 12
+127.0.0.1:6379> BITFIELD fieldkey incrby u4 2 1
+1) (integer) 13
+127.0.0.1:6379> BITFIELD fieldkey incrby u4 2 1
+1) (integer) 14
+127.0.0.1:6379> BITFIELD fieldkey incrby u4 2 1
+1) (integer) 15
+127.0.0.1:6379> BITFIELD fieldkey incrby u4 2 1    #默认overflow为wrap,即循环溢出
+1) (integer) 0
+
+
+127.0.0.1:6379> set test a
+OK
+127.0.0.1:6379> bitfield test get i8 0        #a对应的ASCII码为97
+1) (integer) 97
+127.0.0.1:6379> BITFIELD test set i8 0 127    #i8表示8位二进制，范围(-128到127)
+1) (integer) 97
+127.0.0.1:6379> bitfield test get i8 0 
+1) (integer) 127
+127.0.0.1:6379> BITFIELD test set i8 0 137
+1) (integer) 127
+127.0.0.1:6379> bitfield test get i8 0       #默认overflow为warp，既循环溢出
+1) (integer) -119
+
+```
+
+
+
+- STA溢出  
+
+> 使用饱和计算(saturation arithmetic)方法处理溢出，下溢计算的结果为最小的整数值，而上溢计算的结果为最大的整数值
+
+```
+127.0.0.1:6379> bitfield test get i8 0 
+1) (integer) -119
+127.0.0.1:6379> bitfield test overflow sat set i8 0 128
+1) (integer) -119
+127.0.0.1:6379> BITFIELD test get i8 0
+1) (integer) 127
+
+```
+
+- FAIL溢出
+
+> 命令将拒绝执行那些会导致.上溢或者下溢情况出现的计算,并向用户返回空值表示计算未被执行
+
+```
+127.0.0.1:6379> bitfield test overflow fail set i8 0 888
+1) (nil)
+
+```
 
